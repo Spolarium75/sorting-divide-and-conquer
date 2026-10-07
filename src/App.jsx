@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { topics } from './data/topics'
-import { quizzes } from './data/quiz'
+import { quizQuestions } from './data/quiz'
 
 import BottomNav from './components/BottomNav'
 import Quiz from './components/Quiz'
@@ -27,7 +27,7 @@ function App() {
       setTopicIndex(topicIndex + 1)
       setScreen('topic')
     } else {
-      setScreen('complete')
+      setScreen('quiz')
     }
   }
 
@@ -44,7 +44,6 @@ function App() {
 
   return (
     <main className="min-h-dvh bg-[#0b0d0c] text-[#f3efe6]">
-
       {/* Background */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:70px_70px]" />
@@ -55,10 +54,8 @@ function App() {
       </div>
 
       <div className="relative mx-auto flex min-h-dvh max-w-[1600px] flex-col px-6 py-5 sm:px-10 sm:py-6 lg:px-14">
-
         {/* Header */}
         <header className="flex items-center justify-between border-b border-white/10 pb-5">
-
           <button
             onClick={() => setScreen('home')}
             className="flex items-center gap-3"
@@ -75,13 +72,11 @@ function App() {
           <div className="hidden text-xs uppercase tracking-[0.25em] text-white/40 sm:block">
             CS 05 · Chapter Report
           </div>
-
         </header>
 
         {/* HOME */}
         {screen === 'home' && (
           <section className="flex flex-1 flex-col justify-center py-8 sm:py-10 lg:py-12">
-
             <div className="mb-5 flex items-center gap-4">
               <span className="h-px w-12 bg-[#d4a72c]" />
 
@@ -91,13 +86,10 @@ function App() {
             </div>
 
             <h1 className="text-[clamp(3.5rem,min(6.5vw,10vh),7rem)] font-semibold uppercase leading-[0.86] tracking-[-0.06em]">
-
               Sorting
               <br />
 
-              <span className="text-white/20">
-                &
-              </span>
+              <span className="text-white/20">&</span>
 
               <br />
 
@@ -106,11 +98,9 @@ function App() {
                 <br className="sm:hidden" />
                 Conquer
               </span>
-
             </h1>
 
             <div className="mt-10 grid gap-8 sm:grid-cols-[1fr_auto] sm:items-end">
-
               <p className="max-w-xl text-base leading-relaxed text-white/50 sm:text-lg">
                 Explore sorting algorithms, analyze their performance,
                 and discover how divide-and-conquer transforms complex
@@ -127,16 +117,13 @@ function App() {
                   →
                 </span>
               </button>
-
             </div>
-
           </section>
         )}
 
         {/* INTRO */}
         {screen === 'intro' && (
           <section className="flex flex-1 flex-col justify-center py-10">
-
             <div className="mb-8 flex items-center gap-4">
               <span className="h-px w-12 bg-[#d4a72c]" />
 
@@ -146,7 +133,6 @@ function App() {
             </div>
 
             <div className="grid gap-12 lg:grid-cols-[1fr_0.8fr]">
-
               <div>
                 <h1 className="text-5xl font-semibold uppercase leading-[0.9] tracking-[-0.05em] sm:text-7xl">
                   From simple
@@ -160,7 +146,6 @@ function App() {
               </div>
 
               <div className="flex flex-col justify-end">
-
                 <p className="text-lg leading-relaxed text-white/50">
                   In this chapter, we'll explore three important
                   approaches to sorting: Selection Sort, Insertion Sort,
@@ -178,11 +163,8 @@ function App() {
                 >
                   Begin Topic 01 →
                 </button>
-
               </div>
-
             </div>
-
           </section>
         )}
 
@@ -192,26 +174,30 @@ function App() {
             topic={topic}
             topicNumber={topicIndex + 1}
             totalTopics={topics.length}
-            onContinue={() => setScreen('quiz')}
+            onContinue={() => {
+              if (topicIndex < topics.length - 1) {
+                setScreen('topic')
+                setTopicIndex(topicIndex + 1)
+              } else {
+                setScreen('quiz')
+              }
+            }}
           />
         )}
 
         {/* QUIZ */}
         {screen === 'quiz' && (
           <section className="flex flex-1 items-center py-10">
-
             <Quiz
-              quiz={quizzes[topic.id]}
-              onComplete={nextTopic}
+              quizzes={quizQuestions}
+              onComplete={() => setScreen('complete')}
             />
-
           </section>
         )}
 
         {/* COMPLETE */}
         {screen === 'complete' && (
           <section className="flex flex-1 flex-col items-center justify-center py-10 text-center">
-
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#d4a72c]">
               Chapter Complete
             </p>
@@ -236,17 +222,18 @@ function App() {
             >
               Restart Presentation
             </button>
-
           </section>
         )}
 
         {/* Bottom navigation */}
-        {screen !== 'home' && (
+        {screen !== 'home' && screen !== 'quiz' && (
           <BottomNav
             currentSection={
               screen === 'intro'
                 ? 1
-                : topicIndex + 2
+                : screen === 'complete'
+                  ? totalSections
+                  : topicIndex + 2
             }
             totalSections={totalSections}
             onPrevious={() => {
@@ -254,22 +241,26 @@ function App() {
                 setScreen('home')
               } else if (screen === 'topic') {
                 previousTopic()
-              } else if (screen === 'quiz') {
-                setScreen('topic')
+              } else if (screen === 'complete') {
+                setScreen('quiz')
               }
             }}
             onNext={() => {
               if (screen === 'intro') {
                 openTopic(0)
               } else if (screen === 'topic') {
-                setScreen('quiz')
-              } else if (screen === 'quiz') {
-                nextTopic()
+                if (topicIndex < topics.length - 1) {
+                  setTopicIndex(topicIndex + 1)
+                } else {
+                  setScreen('quiz')
+                }
+              } else if (screen === 'complete') {
+                setScreen('home')
+                setTopicIndex(0)
               }
             }}
           />
         )}
-
       </div>
     </main>
   )
