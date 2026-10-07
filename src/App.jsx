@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
-import { topics, quizzes } from './data/presentation'
+import { topics } from './data/topics'
+import { quizzes } from './data/quiz'
 
 import BottomNav from './components/BottomNav'
 import Quiz from './components/Quiz'
